@@ -1,0 +1,5 @@
+[ {
+  "name" : "loan_identifier_copy",
+  "source" : "loan_identifier",
+  "type" : "identity"
+} ]
