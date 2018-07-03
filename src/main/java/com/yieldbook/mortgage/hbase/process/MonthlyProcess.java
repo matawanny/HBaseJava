@@ -12,12 +12,12 @@ import org.apache.commons.lang3.StringUtils;
 import com.yieldbook.mortgage.hbase.action.BaseFileParser;
 import com.yieldbook.mortgage.hbase.action.FhlmcDailyFileParser;
 
-public class DailyProcess {
+public class MonthlyProcess {
 	
 	private BaseFileParser baseFileParser;
 
 	
-	public DailyProcess(BaseFileParser baseFileParser) {
+	public MonthlyProcess(BaseFileParser baseFileParser) {
 		super();
 		this.baseFileParser = baseFileParser;
 	}
@@ -77,10 +77,10 @@ public class DailyProcess {
 			  System.out.println("As Of Date : " + asOfDateStr);
 		  fileTypeStr = fileTypeStr.toLowerCase();
 		  
-		  DailyProcess preProcess=null;
+		  MonthlyProcess preProcess=null;
 		  switch(fileTypeStr){
 		  case "fhlmc":
-			  preProcess = new DailyProcess(new FhlmcDailyFileParser(inputFileStr));
+			  preProcess = new MonthlyProcess(new FhlmcDailyFileParser(inputFileStr));
 			  preProcess.parseAndWriteFile();
 			  break;
 		  case "fnma":

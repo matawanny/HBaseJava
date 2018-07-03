@@ -12,7 +12,7 @@ import org.apache.hadoop.hbase.client.*;
 import java.io.IOException;
 
 /**
- * Created by swethakolalapudi on 6/29/16.
+ * Created by Fei Xiao
  */
 public class Main {
 

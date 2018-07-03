@@ -100,7 +100,7 @@
   </property>
   <property>
     <name>hbase.zookeeper.quorum</name>
-    <value>ybgdev96.ny.ssmb.com,ybrdev93.ny.ssmb.com,ybrdev96.ny.ssmb.com</value>
+    <value>ybgdev93.ny.ssmb.com,ybrdev93.ny.ssmb.com,ybgdev96.ny.ssmb.com</value>
   </property>
   <property>
     <name>hbase.zookeeper.property.clientPort</name>

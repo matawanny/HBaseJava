@@ -1,0 +1,74 @@
+CUSIP|Issue_Date|Pool_Correction_Indicator|As_of_Date|Pool_Number|Loan_Correction_Indicator|Loan_Identifier|Channel|Seller_Name|Service_Name|Original_Interest_Rate|Current_Interest_Rate|Current_Net_Interest_Rate|Original_UPB|Current_UPB|Original_Loan_Term|First_Payment_Date|Loan_Age|Remaining_Months_to_Maturity|Maturity_Date|LTV|CLTV|Number_Of_Borrowers|Debt_to_Income_Ratio|Credit_Score|First_Time_Home_Buyer_Indicator|Loan_Purpose|Property_Type|Numbers_of_Units|Occupancy_Status|State|Mortgage_Insurance_Percentage|Product_Type|Prepayment_Premium_Term|Interest_Only_Indicator|First_P_I_Payment_Date|Months_to_First_Scheduled_Amortization|Convertibility_Indicator|Mortgage_Margin|Net_Mortgage_Margin|Index|Interest_Rate_Look_Back|Max_Interest_Rate|Net_Max_Interest_Rate|Months_to_Next_Rate_Change|Next_Rate_Change_Date|Rate_Adjustment_Frequency|Initial_Fixed_Rate_Period|Initial_Rate_Cap_Up_Percent|Initial_Rate_Cap_Down_Percent|Periodic_Cap_Up_Percernt|Periodic_Cap_Down_Percernt|Days_Delinquent|Loan_Performance_History|Loan_Age_as_of_Modification|Modificaiton_Program|Modification_Type|Number_Of_Modifications|Total_Capitalized_Amount|Original_Mortgage_Loan_UPB|f1|Current_Deferred_UPB|Interest_Rate_Step_Indicator|Initial_Step_Fixed_Rate_Period|Total_Number_of_Steps|Number_of_Remaining_Steps|Next_Step_Rate|Terminal_Step_Rate|Date_Of_Terminal_Step|Step_Rate_Adjustment_Frequencey|Months_to_Next_Step_Rate_Change|Next_Step_Rate_Change_Date|Periodic_Step_Cap_Up_Percent|Origination_Channel|Origination_Interest_Rate|Origination_UPB|Origination_Loan_Term|Origination_First_Payment_Date|Origination_Maturity_Date|Origination_LTV|Origination_CLTV|Origination_Debt_To_Income_Ratio|Origination_Credit_Score|Origination_Loan_Purpose|Origination_Occupancy_Status|Origination_Product_Type|Origination_Interest_Only_Indicator
+
+
+source file should be 84
+
+/cygdrive/C/data$ head -n 1 FNMMONLL.TXT | awk -F\| '{print NF}'
+87
+/cygdrive/C/data$ head -n 2 FNMMONLL.TXT | tail -n 1| awk -F\| '{print NF}'
+87
+/cygdrive/C/data$ head -n 2 FNMMONLL.TXT | tail -n 1
+
+
+
+kite-dataset csv-schema FNMMONLL.TXT --record-name fnma_month_loan --delimiter '\|' --require cusip,issue_date,as_of_date,pool_number,loan_identifier -o FNMAMONLY.avsc
+
+
+
+kite-dataset create dataset:hive://ybrdev79:9083/prd/fnmamonly --schema fnma_monthly.avsc --partition-by year-month-fnmamonly.json --format parquet
+
+kite-dataset info dataset:hive://ybrdev79:9083/prd/fnmamonly
+
+kite-dataset csv-import FNMMONLL.TXT dataset:hive://ybrdev79:9083/prd/fnmamonly --delimiter '|' --no-header
+
+kite-dataset delete dataset:hive://ybrdev79:9083/prd/fnmamonly
+
+unset SSH_ASKPASS
+git config --global http.sslVerify false
+git clone https://FX36019@ybgweb.ny.ssmb.com/ybgit/scm/bdetl/yb-bigdata.git
+
+git remote add origin https://FX36019@ybgweb.ny.ssmb.com/ybgit/scm/bdetl/yb-bigdata.git
+
+git push -u origin master  
+
+create table prd.fnma_monitors(file_name String,  file_size bigint,  file_lines bigint,  as_of_date bigint, year int, month int,  start_time bigint,  process_last_seconds bigint, total_records bigint, status string)
+
+
+
+hadoop fs -ls /user/hive/warehouse/prd.db/fnmamonly/year=2018/month=04
+hadoop fs -rm /user/hive/warehouse/prd.db/fnmamonly/year=2018/month=04/*
+
+git fetch --all
+git reset --hard origin/master
+
+
+
+git reset --hard HEAD
+git pull
+
+/net/ybr-prodnfs11/embs_prod/PREV_MONTH/
+/net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/
+
+sh -x /usr/book/app/yb-bigdata/src/main/scripts/fnma/PreprocessFiles.sh FNMMONLL.ZIP
+
+Switch Java Environment in Linux box.
+Sqoop require Java 1.7 while embs application require Java 1.8
+
+Refer to https://tecadmin.net/install-java-8-on-centos-rhel-and-fedora/
+
+1. update $JAVA_HOME /etc/bashrc
+2. #alternatives --config java
+
+re-login 
+
+sqoop require encrypted password
+
+hadoop credential create uat.password.alias -provider jceks://hdfs/user/embs/uat.password.jceks
+Enter password:
+bpa123
+
+kite-dataset update dataset:hive://ybrdev79:9083/prd/fnmamonly --schema fnma_monthly.avsc
+
+
+alter table prd.monitors SET TBLPROPERTIES('serialization.null.format'='');
+

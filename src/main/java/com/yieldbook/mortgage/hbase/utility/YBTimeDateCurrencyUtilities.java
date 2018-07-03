@@ -50,14 +50,43 @@ public class YBTimeDateCurrencyUtilities {
 		return calendar.getTimeInMillis();
 	}
 	
-	public static long getMonthYearMillionSecsFHLM(String asOfDate) throws ParseException{
+	public static String getMonthYearMillionSecsFHLM(String asOfDate){
 		
 		Date date = null;
-		date = dfmonthyear.parse(asOfDate);
+		try {
+			
+			if(asOfDate.contains("/")){
+				if(asOfDate.length()==6){
+					asOfDate="0"+asOfDate;
+				}
+				date = dfmonthyear1.parse(asOfDate);
+			}else{
+				if(asOfDate.length()==5){
+					asOfDate="0"+asOfDate;
+				}
+				date = dfmonthyear.parse(asOfDate);
+			}			
+		} catch (ParseException e) {
+			return asOfDate;
+		}
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		return calendar.getTimeInMillis();
+		return calendar.getTimeInMillis()+"";
+	}
+	
+	public static String getMonthYearMillionSecsStringFHLM(String asOfDate){
+		
+		Date date = null;
+		try {
+			date = dfmonthyear.parse(asOfDate);
+		} catch (ParseException e) {
+
+		}
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		return calendar.getTimeInMillis() + "";
 	}
 	
 }

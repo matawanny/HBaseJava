@@ -1,0 +1,65 @@
+{
+	"type": "record",
+	"name": "fhlmc_arm_loan",
+	"fields": [{
+		"name": "loan_identifier",
+		"type": "string"
+	}, {
+		"name": "cusip",
+		"type": "string"
+	}, {
+		"name": "product_type",
+		"type": "string"
+	}, {
+		"name": "convertible_flag",
+		"type": ["null", "string"]
+	}, {
+		"name": "rate_adjmt_freq",
+		"type": ["null", "int"]
+	}, {
+		"name": "initial_period",
+		"type": ["null", "int"]
+	}, {
+		"name": "next_adjmt_date",
+		"type": ["null", "long"]
+	}, {
+		"name": "lookback",
+		"type": ["null", "int"]
+	}, {
+		"name": "gross_margin",
+		"type": ["null", "float"]
+	}, {
+		"name": "net_margin",
+		"type": ["null", "float"]
+	}, {
+		"name": "net_max_life_rate",
+		"type": ["null", "float"]
+	}, {
+		"name": "max_life_rate",
+		"type": ["null", "float"]
+	}, {
+		"name": "init_cap_up",
+		"type": ["null", "float"]
+	}, {
+		"name": "init_cap_dn",
+		"type": ["null", "float"]
+	}, {
+		"name": "periodic_cap",
+		"type": ["null", "float"]
+	}, {
+		"name": "months_to_adjust",
+		"type": ["null", "int"]
+	}, {
+		"name": "index_desc",
+		"type": ["null", "string"]
+	}, {
+		"name": "last_chg_date",
+		"type": ["null", "long"]
+	}, {
+		"name": "eff_date",
+		"type": "long"
+	}, {
+		"name": "as_of_date",
+		"type": "long"
+	}]
+}

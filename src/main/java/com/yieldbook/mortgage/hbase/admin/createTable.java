@@ -18,8 +18,8 @@ public class createTable   {
     public static void main(String[] args) throws IOException {
 
         Configuration conf = HBaseConfiguration.create();
-    	Configuration hConf = HBaseConfiguration.create(conf);
-/*    	hConf.set(HBASE_CONFIGURATION_ZOOKEEPER_QUORUM, "ybgdev96.ny.ssmb.com,ybrdev93.ny.ssmb.com,ybrdev96.ny.ssmb.com");
+/*    	Configuration hConf = HBaseConfiguration.create(conf);
+    	hConf.set(HBASE_CONFIGURATION_ZOOKEEPER_QUORUM, "ybgdev96.ny.ssmb.com,ybrdev93.ny.ssmb.com,ybrdev96.ny.ssmb.com");
     	hConf.set(HBASE_CONFIGURATION_ZOOKEEPER_CLIENTPORT, "2181");
 */
         Connection connection = ConnectionFactory.createConnection(conf);
