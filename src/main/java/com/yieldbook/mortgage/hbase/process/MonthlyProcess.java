@@ -10,7 +10,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yieldbook.mortgage.hbase.action.BaseFileParser;
-import com.yieldbook.mortgage.hbase.action.FhlmcDailyFileParser;
+import com.yieldbook.mortgage.hbase.action.FhlmcMonthlyFileParser;
 
 public class MonthlyProcess {
 	
@@ -80,7 +80,7 @@ public class MonthlyProcess {
 		  MonthlyProcess preProcess=null;
 		  switch(fileTypeStr){
 		  case "fhlmc":
-			  preProcess = new MonthlyProcess(new FhlmcDailyFileParser(inputFileStr));
+			  preProcess = new MonthlyProcess(new FhlmcMonthlyFileParser(inputFileStr));
 			  preProcess.parseAndWriteFile();
 			  break;
 		  case "fnma":

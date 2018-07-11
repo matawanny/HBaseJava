@@ -9,6 +9,7 @@ then
 fi	
 
 AS_OF_DATE=$1
+UPDATE_HBASE_ONLY=$2
 if [ -z "$AS_OF_DATE" ]
 then
       echo "Must input as of date!"
@@ -16,42 +17,53 @@ then
       exit;
 fi
 
-ls FHLDLYLF.ZIP
-
+cd /usr/book/embs/fhlmc
+ls $AS_OF_DATE
 if [[ $? -ne 0 ]]
 then
-	echo copy source file FHLDLYLA.ZIP, FHLDLYLF.ZIP, FHLDLYLA.SIG, FHLDLYLF.SIG
-	ls /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/FHLDLYLF.ZIP
-	if [[ $? -ne 0 ]]
-	then 
-  		exit
-	else  
-		cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/FHLDLYLA.ZIP .
-		cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/FHLDLYLF.ZIP .
-		cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Signal/FHLDLYLA.SIG .
-		cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Signal/FHLDLYLF.SIG .
-	fi	
+  echo "Create a folder $AS_OF_DATE"
+  mkdir $AS_OF_DATE
 fi
+cd $AS_OF_DATE
 
-ls FHLDLYLF.ZIP
-
+ls FHLDLYLF.TXT
 if [[ $? -ne 0 ]]
 then
-echo 'There is no daily files under /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/'
-exit 10
-
+	ls FHLDLYLF.ZIP
+	if [[ $? -ne 0 ]]
+	then
+		echo copy source file FHLDLYLF.ZIP, FHLDLYLF.SIG
+		ls /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/FHLDLYLF.ZIP
+		if [[ $? -ne 0 ]]
+		then
+			echo 'There is no daily files FHLDLYLF.ZIP under /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/'
+	  		exit
+		else  
+			cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/FHLDLYLF.ZIP .
+			cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Signal/FHLDLYLF.SIG .
+		fi
+	fi
+	unzip FHLDLYLF.ZIP
 fi
 
 ls FHLDLYLA.TXT
 if [[ $? -ne 0 ]]
 then
+	ls FHLDLYA.ZIP
+	if [[ $? -ne 0 ]]
+	then
+		echo copy source file FHLDLYLA.ZIP, FHLDLYLA.SIG
+		ls /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/FHLDLYLA.ZIP
+		if [[ $? -ne 0 ]]
+		then
+			echo 'There is no daily FHLDLYA.ZIP files under /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/'
+	  		exit
+		else  
+			cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/FHLDLYLA.ZIP .
+			cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Signal/FHLDLYLA.SIG .
+		fi
+	fi
 	unzip FHLDLYLA.ZIP
-fi
-
-ls FHLDLYLF.TXT
-if [[ $? -ne 0 ]]
-then
-	unzip FHLDLYLF.ZIP
 fi
 
 filename="FHLDLYLF.TXT"
@@ -79,8 +91,8 @@ then
 		exit;
 	fi
 
-	day=$(echo $sigName|cut -f 1 -d ' ')
-	time=$(echo $sigName|cut -f 2 -d ' ')
+	day=$(cat $sigName|cut -f 1 -d ' ')
+	time=$(cat $sigName|cut -f 2 -d ' ')
 	asOfDate=$day
 	effectiveDate=$(echo ${day:0:6})
 	effectiveDate+="01 00:00:00"
@@ -115,7 +127,6 @@ sed  "s/$/\|$timeSec\|$day/g" $filename >>$newFileName
 
 FILESIZE1=$(stat -c%s FHLDLYLF.TXT)
 FILESIZE2=$(stat -c%s FHLDLYLA.TXT)
-
 
 if [ -f $newFileName3 ]
 then
@@ -164,15 +175,35 @@ rm -rf fhlmc_loan_daily.csv fhlmc_arm_loan_daily.csv fhlmc_mod_loan_daily.csv
 libfile=/usr/book/repository/com/yieldbook/HBaseJava/1.0-SNAPSHOT/HBaseJava-1.0-SNAPSHOT-shaded.jar
 java -Xms1024m -Xmx2048m -cp $libfile com.yieldbook.mortgage.hbase.process.DailyProcess -t fhlmc -i $newFileName3
 
-echo "kite-dataset csv-import"
-kite-dataset csv-import fhlmc_loan_daily.csv fhlmc_loan_daily --delimiter '|' --no-header
-kite-dataset csv-import fhlmc_arm_loan_daily.csv fhlmc_arm_loan_daily --delimiter '|' --no-header
-kite-dataset csv-import fhlmc_mod_loan_daily.csv fhlmc_mod_loan_daily --delimiter '|' --no-header
+if [ -z "$UPDATE_HBASE_ONLY" ]
+then
+	echo "kite-dataset csv-import"
+	hadoop fs -ls /user/hive/warehouse/fhlmc_loan_daily/as_of_date_copy=$day
+	if [[ $? -eq 0 ]]
+	then
+		hadoop fs -rm -r /user/hive/warehouse/fhlmc_loan_daily/as_of_date_copy=$day
+	fi
+	kite-dataset csv-import fhlmc_loan_daily.csv fhlmc_loan_daily --delimiter '|' --no-header
+	
+	hadoop fs -ls /user/hive/warehouse/fhlmc_arm_loan_daily/as_of_date_copy=$day
+	if [[ $? -eq 0 ]]
+	then
+		hadoop fs -rm -r /user/hive/warehouse/fhlmc_arm_loan_daily/as_of_date_copy=$day
+	fi
+	
+	kite-dataset csv-import fhlmc_arm_loan_daily.csv fhlmc_arm_loan_daily --delimiter '|' --no-header
+	
+	hadoop fs -ls /user/hive/warehouse/fhlmc_mod_loan_daily/as_of_date_copy=$day
+	if [[ $? -eq 0 ]]
+	then
+		hadoop fs -rm -r /user/hive/warehouse/fhlmc_mod_loan_daily/as_of_date_copy=$day
+	fi
+	kite-dataset csv-import fhlmc_mod_loan_daily.csv fhlmc_mod_loan_daily --delimiter '|' --no-header
+fi
 
 echo "Clean up local files:"
-# rm -rf *.TXT *_TS.dat
-#rm -rf *.csv
-# rm -rf *.ZIP *.SIG
+rm -rf FHLDLYL*.TXT FHLDLYL*.dat *_daily.csv
+rm -rf FHLDLYL?.ZIP FHLDLYL?.SIG
 
 END=$(date +%s)
 DIFF=$(echo "$END - $START" | bc)

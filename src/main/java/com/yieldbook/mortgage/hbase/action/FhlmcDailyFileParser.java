@@ -154,7 +154,7 @@ public class FhlmcDailyFileParser extends BaseFileParser {
     			des[26]=src[34]; //seller
     			des[27]=lastChgDate+""; //last_chg_date
     			des[28]=src[7]; //current_upb
-    			des[29]=src[105]; //eff_date
+    			des[29]=src[src.length-2]; //eff_date
     			des[30]=""; //doc_assets
     			des[31]=""; //doc_empl
     			des[32]=""; //doc_income
@@ -172,7 +172,7 @@ public class FhlmcDailyFileParser extends BaseFileParser {
     			des[44]=src[38]; //govt_ins_grnte
     			des[45]=src[39]; //assumability_ind
     			des[46]=src[44]; //prepay_term
-    			des[47]=src[106]; //as_of_date  			
+    			des[47]=src[src.length-1]; //as_of_date  			
     			break;
     		case ARM_LOAN:
     			des[0]=src[0]; //loan_identifier
@@ -193,13 +193,13 @@ public class FhlmcDailyFileParser extends BaseFileParser {
     			des[15]=src[55]; //months_to_adjust
     			des[16]=src[45]; //index_desc
     			des[17]=lastChgDate+""; //last_chg_date
-    			des[18]=src[105]; //eff_date
-    			des[19]=src[106]; //as_of_date 			
+    			des[18]=src[src.length-2]; //eff_date
+    			des[19]=src[src.length-1]; //as_of_date 			
     			break;
     		case MOD_LOAN:
     			des[0]=src[0]; //loan_identifier
     			des[1]=src[4]; //cusip
-    			des[2]=src[105]; //eff_date
+    			des[2]=src[src.length-2]; //eff_date
     			des[3]=src[1]; //correction_flag
     			des[4]=src[8]; //product_type
     			des[5]=src[100]; //origin_loan_purpose
@@ -237,7 +237,7 @@ public class FhlmcDailyFileParser extends BaseFileParser {
     			des[37]=src[80]; //terminal_step_rate
     			des[38]=src[81]; //terminal_step_date
     			des[39]=""; //cur_gross_note_rate
-    			des[40]=src[106]; //as_of_date
+    			des[40]=src[src.length-1]; //as_of_date
     			break;
     		default:
     		    throw new AssertionError("Unknown Table Type");

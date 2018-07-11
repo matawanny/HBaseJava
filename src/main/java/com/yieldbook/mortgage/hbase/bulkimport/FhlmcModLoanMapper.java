@@ -261,12 +261,12 @@ public class FhlmcModLoanMapper extends
 		}
 		if (!StringUtils.isEmpty(fields[105])) {
 			kv = new KeyValue(hKey.get(), COL_FAM,
-					FhlmcModLoanColumnEnum.EFF_DATE.getColumnName(), fields[105].getBytes());
+					FhlmcModLoanColumnEnum.EFF_DATE.getColumnName(), fields[fields.length-2].getBytes());
 			context.write(hKey, kv);
 		}
 		if (!StringUtils.isEmpty(fields[106])) {
 			kv = new KeyValue(hKey.get(), COL_FAM,
-					FhlmcModLoanColumnEnum.AS_OF_DATE.getColumnName(), fields[106].getBytes());
+					FhlmcModLoanColumnEnum.AS_OF_DATE.getColumnName(), fields[fields.length-1].getBytes());
 			context.write(hKey, kv);
 		}		
 		long lastChgDate = Calendar.getInstance().getTimeInMillis();

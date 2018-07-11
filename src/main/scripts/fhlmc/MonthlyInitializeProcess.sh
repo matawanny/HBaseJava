@@ -16,40 +16,55 @@ then
       exit;
 fi
 
-ls FHLMONLA.ZIP
-
+cd /usr/book/embs/fhlmc
+ls $AS_OF_DATE
 if [[ $? -ne 0 ]]
 then
-echo copy source file FHLMONLA.ZIP, FHLMONLF.ZIP, FHLMONLA.SIG, FHLMONLF.SIG
-cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/FHLMONLA.ZIP .
-cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/FHLMONLF.ZIP .
-cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Signal/FHLMONLA.SIG .
-cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Signal/FHLMONLF.SIG .
-
+  echo "Create a folder $AS_OF_DATE"
+  mkdir $AS_OF_DATE
 fi
-
-ls FHLMONLA.ZIP
-
-if [[ $? -ne 0 ]]
-then
-echo 'There is no monthly files under /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/'
-exit 10
-
-fi
+cd $AS_OF_DATE
 
 ls FHLMONLA.TXT
 if [[ $? -ne 0 ]]
 then
+    ls FHLMONLA.ZIP
+    if [[ $? -ne 0 ]]
+    then
+		echo copy source file FHLMONLA.ZIP, FHLMONLA.SIG
+		ls /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/FHLMONLA.ZIP
+		if [[ $? -ne 0 ]]
+		then 
+			echo 'There is no monthly files FHLMONLA.ZIP under /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/'
+	  		exit 10
+		else	
+			cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/FHLMONLA.ZIP .
+			cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Signal/FHLMONLA.SIG .
+
+		fi
+	fi
 	unzip FHLMONLA.ZIP
 fi
 
 ls FHLMONLF.TXT
 if [[ $? -ne 0 ]]
 then
+    ls FHLMONLF.ZIP
+    if [[ $? -ne 0 ]]
+    then
+		echo copy source file FHLMONLF.ZIP, FHLMONLF.SIG
+		ls /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/FHLMONLF.ZIP
+		if [[ $? -ne 0 ]]
+		then 
+			echo 'There is no monthly files FHLMONLF.ZIP under /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/'
+	  		exit 10
+		else	
+			cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Products/FHLMONLF.ZIP .
+			cp /net/ybr-prodnfs11/vendordata-PROD/data-grp15/embsdata/embs/daily/$AS_OF_DATE/Signal/FHLMONLF.SIG .
+		fi
+	fi
 	unzip FHLMONLF.ZIP
 fi
-
-
 ls FHLMONLAF_key_sort.txt
 if [[ $? -ne 0 ]]
 then
