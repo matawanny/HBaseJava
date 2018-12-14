@@ -1,8 +1,6 @@
 package com.yieldbook.mortgage.hbase.bulkimport;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.text.ParseException;
 import java.util.Calendar;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +12,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import com.opencsv.CSVParser;
-import com.yieldbook.mortgage.hbase.utility.YBTimeDateCurrencyUtilities;
+import static com.yieldbook.mortgage.hbase.utility.YBTimeDateCurrencyUtilities.*;
 
 /**
  * Mapper Class
@@ -27,7 +25,7 @@ public class FhlmcLoanMapper extends
 
 	CSVParser csvParser = new CSVParser('|');
 	String tableName = "";
-	String asOfDate = "";
+
 
 	ImmutableBytesWritable hKey = new ImmutableBytesWritable();
 	KeyValue kv;
@@ -41,7 +39,7 @@ public class FhlmcLoanMapper extends
 		
 		// Get parameters
 		tableName = c.get("hbase.table.name");
-		asOfDate = c.get("as.of.date");
+
 		// in parameter is now saved: "pass parameter example"
 		// ( passed from Driver class )
 	}
@@ -58,6 +56,13 @@ public class FhlmcLoanMapper extends
 			fields = csvParser.parseLine(value.toString());
 		} catch (Exception ex) {
 			context.getCounter("FhlmcLoanMapper", "PARSE_ERRORS").increment(1);
+			return;
+		}
+		
+		if(fields.length<76){
+			context.getCounter("FhlmcLoanMapper", "PARSE_ERRORS").increment(1);
+			System.out.println("java.lang.ArrayIndexOutOfBoundsException, length=" + fields.length);
+			System.out.println(value.toString());
 			return;
 		}
 
@@ -110,26 +115,24 @@ public class FhlmcLoanMapper extends
 					FhlmcLoanColumnEnum.ORIG_NOTE_RATE.getColumnName(), fields[9].getBytes());
 			context.write(hKey, kv);
 		}
-		if (!StringUtils.isEmpty(fields[12])) {
+		if (!StringUtils.isEmpty(fields[10])) {
 			kv = new KeyValue(hKey.get(), COL_FAM,
-					FhlmcLoanColumnEnum.PC_ISSUANCE_NOTE_RATE.getColumnName(), fields[12].getBytes());
+					FhlmcLoanColumnEnum.PC_ISSUANCE_NOTE_RATE.getColumnName(), fields[10].getBytes());
 			context.write(hKey, kv);
 		}
-		if (!StringUtils.isEmpty(fields[13])) {
+		if (!StringUtils.isEmpty(fields[12])) {
 			kv = new KeyValue(hKey.get(), COL_FAM,
-					FhlmcLoanColumnEnum.NET_NOTE_RATE.getColumnName(), fields[13].getBytes());
+					FhlmcLoanColumnEnum.NET_NOTE_RATE.getColumnName(), fields[12].getBytes());
 			context.write(hKey, kv);
 		}
 		if (!StringUtils.isEmpty(fields[14])) {
-			fields[14]=YBTimeDateCurrencyUtilities
-				.getMonthYearMillionSecsFHLM(fields[14]);
+			fields[14]=getMonthYearMillionSecsEmbs(fields[14]);
 			kv = new KeyValue(hKey.get(), COL_FAM,
 					FhlmcLoanColumnEnum.FIRST_PAYMENT_DATE.getColumnName(), fields[14].getBytes());
 			context.write(hKey, kv);
 		}
 		if (!StringUtils.isEmpty(fields[15])) {
-			fields[15]=YBTimeDateCurrencyUtilities
-				.getMonthYearMillionSecsFHLM(fields[15]);
+			fields[15]=getMonthYearMillionSecsEmbs(fields[15]);
 			kv = new KeyValue(hKey.get(), COL_FAM,
 					FhlmcLoanColumnEnum.MATURITY_DATE.getColumnName(), fields[15].getBytes());
 			context.write(hKey, kv);
@@ -245,8 +248,7 @@ public class FhlmcLoanMapper extends
 			context.write(hKey, kv);
 		}
 		if (!StringUtils.isEmpty(fields[41])) {
-			fields[41]=YBTimeDateCurrencyUtilities
-				.getMonthYearMillionSecsFHLM(fields[41]);
+			fields[41]=getMonthYearMillionSecsEmbs(fields[41]);
 			kv = new KeyValue(hKey.get(), COL_FAM,
 					FhlmcLoanColumnEnum.FIRST_PI_DATE.getColumnName(), fields[41].getBytes());
 			context.write(hKey, kv);
@@ -277,12 +279,12 @@ public class FhlmcLoanMapper extends
 			context.write(hKey, kv);
 		}
 
-		if (!StringUtils.isEmpty(fields[105])) {
+		if (!StringUtils.isEmpty(fields[fields.length-2])) {
 			kv = new KeyValue(hKey.get(), COL_FAM,
 					FhlmcLoanColumnEnum.EFF_DATE.getColumnName(), fields[fields.length-2].getBytes());
 			context.write(hKey, kv);
 		}
-		if (!StringUtils.isEmpty(fields[106])) {
+		if (!StringUtils.isEmpty(fields[fields.length-1])) {
 			kv = new KeyValue(hKey.get(), COL_FAM,
 					FhlmcLoanColumnEnum.AS_OF_DATE.getColumnName(), fields[fields.length-1].getBytes());
 			context.write(hKey, kv);

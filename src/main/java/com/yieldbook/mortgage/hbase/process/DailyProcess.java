@@ -11,6 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yieldbook.mortgage.hbase.action.BaseFileParser;
 import com.yieldbook.mortgage.hbase.action.FhlmcDailyFileParser;
+import com.yieldbook.mortgage.hbase.action.FnmaDailyFileParser;
+import com.yieldbook.mortgage.hbase.action.GnmaDailyFileParser;
 
 public class DailyProcess {
 	
@@ -50,6 +52,16 @@ public class DailyProcess {
 		  asofdate.setArgName("AS OF DATE");
 		  options.addOption(asofdate);
 		  
+		  Option lastchgdate = new Option("l", "lastchgdate", true, "Last Change Date related to storing folder name");
+		  //output.setRequired(true);
+		  asofdate.setArgName("LAST CHANGE DATE");
+		  options.addOption(lastchgdate);
+		  
+		  Option poolfile = new Option("p", "poolfile", true, "Pool Level source file like FHLSEC_DIC.TXT");
+		  //output.setRequired(true);
+		  asofdate.setArgName("POOL FILE");
+		  options.addOption(poolfile);
+		  
 		  CommandLineParser commandLineParser = new DefaultParser();
 		  HelpFormatter helpFormatter = new HelpFormatter();
 		  CommandLine commandLine;
@@ -67,7 +79,9 @@ public class DailyProcess {
 		  String inputFileStr = commandLine.getOptionValue("input");
 		  String fileTypeStr = commandLine.getOptionValue("filetype");
 		  String outputFileStr = commandLine.getOptionValue("output");
+		  String poolFileStr = commandLine.getOptionValue("poolfile");
 		  String asOfDateStr = commandLine.getOptionValue("asofdate");
+		  String lastChgDateStr = commandLine.getOptionValue("lastchgdate");
 
 		  System.out.println("Input File: " + inputFileStr);
 		  System.out.println("filetype : " + fileTypeStr);
@@ -75,22 +89,26 @@ public class DailyProcess {
 			  System.out.println("Output File Path : " + outputFileStr);
 		  if(!StringUtils.isEmpty(asOfDateStr))
 			  System.out.println("As Of Date : " + asOfDateStr);
-		  fileTypeStr = fileTypeStr.toLowerCase();
+		  if(!StringUtils.isEmpty(lastChgDateStr))
+			  System.out.println("LAST CHANGE Date : " + lastChgDateStr);			  
+
 		  
 		  DailyProcess preProcess=null;
 		  switch(fileTypeStr){
-		  case "fhlmc":
-			  preProcess = new DailyProcess(new FhlmcDailyFileParser(inputFileStr));
+		  case "fhlmc_loan":
+			  preProcess = new DailyProcess(new FhlmcDailyFileParser(inputFileStr,poolFileStr, asOfDateStr));
 			  preProcess.parseAndWriteFile();
 			  break;
-		  case "fnma":
-			  /*preProcess = new DailyProcess(new FNMAFileParser(inputFileStr, asOfDateStr, outputFileStr));
-			  preProcess.parseAndWriteFile();*/
+		  case "fnma_loan":
+			  preProcess = new DailyProcess(new FnmaDailyFileParser(inputFileStr, asOfDateStr));
+			  preProcess.parseAndWriteFile();
 			  break;
-			  
+		  case "gnma_loan":
+			  preProcess = new DailyProcess(new GnmaDailyFileParser(inputFileStr, asOfDateStr,  lastChgDateStr));
+			  preProcess.parseAndWriteFile();
+			  break;			  
 		  default: 
 			  System.out.println("File Type: " +  fileTypeStr + " is not supported. ");
-		  
 		  }
 
 		 }

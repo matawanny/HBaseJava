@@ -9,22 +9,22 @@
 		"type": "string"
 	}, {
 		"name": "eff_date",
-		"type": "long"
+		"type": "int"
 	}, {
 		"name": "correction_flag",
-		"type": ["null", "string"]
+		"type": "string"
 	}, {
 		"name": "product_type",
 		"type": "string"
 	}, {
 		"name": "origin_loan_purpose",
-		"type": ["null", "string"]
+		"type": "string"
 	}, {
 		"name": "origin_tpo_flag",
-		"type": ["null", "string"]
+		"type": "string"
 	}, {
 		"name": "origin_occupancy_status",
-		"type": ["null", "string"]
+		"type": "string"
 	}, {
 		"name": "origin_credit_score",
 		"type": ["null", "int"]
@@ -36,7 +36,7 @@
 		"type": ["null", "int"]
 	}, {
 		"name": "origin_io_flag",
-		"type": ["null", "string"]
+		"type": "string"
 	}, {
 		"name": "origin_first_paym_date",
 		"type": ["null", "long"]
@@ -45,10 +45,10 @@
 		"type": ["null", "long"]
 	}, {
 		"name": "origin_note_rate",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "origin_loan_amt",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "origin_cltv",
 		"type": ["null", "int"]
@@ -57,37 +57,37 @@
 		"type": ["null", "int"]
 	}, {
 		"name": "origin_product_type",
-		"type": ["null", "string"]
+		"type": "string"
 	}, {
 		"name": "mod_date_loan_age",
 		"type": ["null", "int"]
 	}, {
 		"name": "mod_program",
-		"type": ["null", "string"]
+		"type": "string"
 	}, {
 		"name": "mod_type",
-		"type": ["null", "string"]
+		"type": "string"
 	}, {
 		"name": "num_of_mods",
 		"type": ["null", "int"]
 	}, {
 		"name": "tot_capitalized_amt",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "last_chg_date",
 		"type": ["null", "long"]
 	}, {
 		"name": "int_bear_loan_amt",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "deferred_amt",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "deferred_upb",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "rate_step_ind",
-		"type": ["null", "string"]
+		"type": "string"
 	}, {
 		"name": "tot_steps",
 		"type": ["null", "int"]
@@ -102,25 +102,25 @@
 		"type": ["null", "int"]
 	}, {
 		"name": "periodic_cap_up",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "months_to_adj",
 		"type": ["null", "int"]
 	}, {
 		"name": "next_step_rate",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "next_adj_date",
 		"type": ["null", "long"]
 	}, {
 		"name": "terminal_step_rate",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "terminal_step_date",
 		"type": ["null", "long"]
 	}, {
 		"name": "cur_gross_note_rate",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "as_of_date",
 		"type": "long"

@@ -12,7 +12,7 @@
 		"type": "string"
 	}, {
 		"name": "convertible_flag",
-		"type": ["null", "string"]
+		"type": "string"
 	}, {
 		"name": "rate_adjmt_freq",
 		"type": ["null", "int"]
@@ -27,37 +27,37 @@
 		"type": ["null", "int"]
 	}, {
 		"name": "gross_margin",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "net_margin",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "net_max_life_rate",
-		"type": ["null", "float"]
+		"type": "string"
 	}, {
 		"name": "max_life_rate",
-		"type": ["null", "float"]
+		"type": "string"
 	}, {
 		"name": "init_cap_up",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "init_cap_dn",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "periodic_cap",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "months_to_adjust",
 		"type": ["null", "int"]
 	}, {
 		"name": "index_desc",
-		"type": ["null", "string"]
+		"type": "string"
 	}, {
 		"name": "last_chg_date",
 		"type": ["null", "long"]
 	}, {
 		"name": "eff_date",
-		"type": "long"
+		"type": "int"
 	}, {
 		"name": "as_of_date",
 		"type": "long"

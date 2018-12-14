@@ -72,3 +72,94 @@ kite-dataset update dataset:hive://ybrdev79:9083/prd/fnmamonly --schema fnma_mon
 
 alter table prd.monitors SET TBLPROPERTIES('serialization.null.format'='');
 
+kite-dataset delete dataset:hive://ybrdev79:9083/fnma_loan_daily
+kite-dataset create dataset:hive://ybrdev79:9083/fnma_loan_daily --schema fnma_loan_daily.avsc --partition-by fnma_daily_partition.json --format parquet
+kite-dataset create dataset:hive://ybrdev79:9083/fnma_arm_loan_daily --schema fnma_arm_loan_daily.avsc --partition-by fnma_daily_partition.json --format parquet
+kite-dataset create dataset:hive://ybrdev79:9083/fnma_mod_loan_daily --schema fnma_mod_loan_daily.avsc --partition-by fnma_daily_partition.json --format parquet
+
+____________________
+OOZIE
+serially/dependent
+in parallel/independent
+Directed Acyclic Graph (no circle) (DAG)
+-- workflow
+A (OOZIE) workflow specifies a set of actions and the order and conditions under which those actions should be performed.
+
+Actions: MapReduce Job/Hive Query/Pig Query/Shell Scripts/Java Program
+
+Each of these are individual workflows by themselves
+
+THe coordinator schedules the execution of a workflow at a specified time and/or a specified frequency.
+If input data is not available then the workflow is delayed till the data becomes available.
+If no input data is needed then the workflow runs purely at a specified time or frequency.
+Each of these workflows can have a coordinator.
+A car is build with a collection of Coordinator jobs.
+A collection of Coordinator jobs which cna be started, stopped and modified together is called a Bundle.
+The output of one Coordinator job managing a workflow can be the input to another Coordinator job. 
+--are chained together
+Data Pipelines transform data in phases
+Workflows, Coordinators, Bundlues all come together to form the building blocks of Oozie.
+
+Oozie is an orchestration system for Hadoop jobs.
+
+An Oozie Application defined by xml can be a workflow run manually, a single coordinator or a number of coordinators forming a bundle.
+
+The applicaton can be a workflow run manually, a single coordinato or a number of coordinators forming
+a bundle which is tipically representing a data pipeline
+
+workflow.xml, coordinator.xml, bundle.xml
+
+Oozie expects all files(including XML files) to be in HDFS before it can run
+
+Messaging is one the popular trend in sharing the data between the applications/systems real time
+
+There are two popular legacy messaging solutions Publish-Subscribe(Topic) and Queue:
+Publish-Subscribe: messages are published to a message roker and message will be distributed to all of the consumers.
+Topics retains message only as long as it tqakes to distribute them to current subscribers. The subscribers must
+continue to be active for it to consume the messges.
+
+Queues: Messages are published to a queue and the consumer will read from it. Limitatin is you can have only one
+consumer per queue.
+
+There is always a limit on the size of the message because larger message may end up breaking the message broker or
+make the broker to perform slower.
+
+Legacy Messaging solution have zero Fault-Tolerance.
+
+What is Apache Kafka?
+1 It is a scalable, reliable, high volume and high throughput distributed messaging system. It is maily used for sharing
+high volumn data from one system to another system in real time and retention of data.
+
+Advantages
+1. Messages are not removed form the topic as soon as the consumers consume it.
+2. Kafka is horizontally scalable
+3. Kafka has stronger ordering guarantees than a traditional messaging system.
+4. Kafka can handle high volume and it has very high throughput.
+5. Kafka design supports loosely coupled Producers and Consumers.
+6. Kafka can also be used as a storage system.
+
+
+The componets that holds message in Kafka is called topics. Each topic has a unique name.
+The topics live in broker, which is a server which can hold number of topics.
+
+Kafka achieve high throughput and distribut management by Cluster, which is a group of Kafka brokers.
+The Cluster will ditribute the load coming to it and process them simutaniously.
+
+What is a Distributed System?
+1. Systems are designed in such a way that it distributes the load within the system and process the load simultaneously.
+2. To achieve simultaneous processing the load needs to be distributed across the cluster and there needs to be coordination
+3.In world of distributed systems these are archieved using a protocal called gossip protocol
+4. There need to be a system in place in order to monitor the
+
+
+
+
+
+
+
+
+
+ 
+
+
+

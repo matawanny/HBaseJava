@@ -22,3 +22,34 @@ STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
 WITH SERDEPROPERTIES
 ("hbase.columns.mapping"=":key,m:cusip,m:product_type,m:convertible_flag,m:rate_adjmt_freq,m:initial_period,m:next_adjmt_date,m:lookback,m:gross_margin,m:net_margin,m:net_max_life_rate,m:max_life_rate,m:init_cap_up,m:init_cap_dn,m:periodic_cap,m:months_to_adjust,m:index_desc,m:last_chg_date,m:eff_date,m:as_of_date",
 "hbase.table.default.storage.type"="binary");
+
+CREATE EXTERNAL TABLE fnma_loan_monthly(
+loan_identifier string,cusip string,prod_type_ind string,loan_purpose string,occupancy_type string,num_units string,state string,credit_score int,orig_loan_term int,orig_ltv int,prepay_premium_term string,io_flag string,first_payment_date bigint,first_pi_date bigint,maturity_date bigint,orig_note_rate float,note_rate float,net_note_rate float,orig_loan_size double,loan_age int,rem_months_to_maturity int,months_to_amortize int,servicer string,seller string,last_chg_date bigint,current_upb double,eff_date bigint,orig_dti int,first_time_buyer string,ins_percent int,num_borrowers int,orig_cltv int,property_type string,tpo_flag string,as_of_date bigint)
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES
+("hbase.columns.mapping"=":key,m:cusip,m:prod_type_ind,m:loan_purpose,m:occupancy_type,m:num_units,m:state,m:credit_score,m:orig_loan_term,m:orig_ltv,m:prepay_premium_term,m:io_flag,m:first_payment_date,m:first_pi_date,m:maturity_date,m:orig_note_rate,m:note_rate,m:net_note_rate,m:orig_loan_size,m:loan_age,m:rem_months_to_maturity,m:months_to_amortize,m:servicer,m:seller,m:last_chg_date,m:current_upb,m:eff_date,m:orig_dti,m:first_time_buyer,m:ins_percent,m:num_borrowers,m:orig_cltv,m:property_type,m:tpo_flag,m:as_of_date",
+"hbase.table.default.storage.type"="binary");
+
+CREATE EXTERNAL TABLE fnma_arm_loan_monthly(
+loan_identifier string,cusip string,convertible_flag string,rate_adjmt_freq int,initial_period int,next_adjmt_date bigint,lookback int,gross_margin float,net_margin float,net_max_life_rate float,max_life_rate float,init_cap_up float,init_cap_dn float,periodic_cap_up float,periodic_cap_dn float,months_to_adjust int,index_num int,last_chg_date bigint,eff_date bigint,as_of_date bigint)
+ STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES
+("hbase.columns.mapping"=":key,m:cusip,m:convertible_flag,m:rate_adjmt_freq,m:initial_period,m:next_adjmt_date,m:lookback,m:gross_margin,m:net_margin,m:net_max_life_rate,m:max_life_rate,m:init_cap_up,m:init_cap_dn,m:periodic_cap_up,m:periodic_cap_dn,m:months_to_adjust,m:index_num,m:last_chg_date,m:eff_date,m:as_of_date",
+"hbase.table.default.storage.type"="binary");
+
+CREATE EXTERNAL TABLE fnma_mod_loan_monthly(
+loan_identifier string,cusip string,eff_date bigint,last_chg_date bigint,days_delinquent string,loan_performance_history string,mod_date_loan_age int,mod_program string,mod_type string,num_of_mods int,tot_capitalized_amt double,origin_loan_amt double,deferred_upb double,rate_step_ind string,initial_fixed_per int,tot_steps int,rem_steps int,next_step_rate float,terminal_step_rate float,terminal_step_date bigint,rate_adj_freq int,months_to_adj int,next_adj_date bigint,periodic_cap_up float,origin_channel string,origin_note_rate float,origin_upb double,origin_loan_term int,origin_first_paym_date bigint,origin_maturity_date bigint,origin_ltv int,origin_cltv int,origin_dti int,origin_credit_score int,origin_loan_purpose string,origin_occupancy_status string,origin_product_type string,origin_io_flag string,as_of_date bigint)
+ STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES
+("hbase.columns.mapping"=":key,m:cusip,m:eff_date,m:last_chg_date,m:days_delinquent,m:loan_performance_history,m:mod_date_loan_age,m:mod_program,m:mod_type,m:num_of_mods,m:tot_capitalized_amt,m:origin_loan_amt,m:deferred_upb,m:rate_step_ind,m:initial_fixed_per,m:tot_steps,m:rem_steps,m:next_step_rate,m:terminal_step_rate,m:terminal_step_date,m:rate_adj_freq,m:months_to_adj,m:next_adj_date,m:periodic_cap_up,m:origin_channel,m:origin_note_rate,m:origin_upb,m:origin_loan_term,m:origin_first_paym_date,m:origin_maturity_date,m:origin_ltv,m:origin_cltv,m:origin_dti,m:origin_credit_score,m:origin_loan_purpose,m:origin_occupancy_status,m:origin_product_type,m:origin_io_flag,m:as_of_date",
+"hbase.table.default.storage.type"="binary");
+
+CREATE EXTERNAL TABLE gnma_loan_monthly(
+cusip  String,eff_date  int,loan_seq_num  int,gnma_issuer_num  int,agency  String,loan_purpose  String,refi_type  int,first_payment_date  int,maturity_date  int,note_rate  double,orig_loan_amt  double,orig_upb  double,current_upb  double,orig_loan_term  int,loan_age  int,rem_months_to_maturity  int,months_delinq  int,months_prepaid  int,gross_margin  double,orig_ltv  double,orig_cltv  double,orig_dti  double,credit_score  int,down_paym_assist  String,buy_down_status  String,upfront_mip  double,annual_mip  double,num_borrowers  String,first_time_buyer  String,num_units  String,state  String,msa  String,tpo_flag  String,curr_month_liq_flag  String,removal_reason  int,lastChgDate  int,loan_orig_date  int,seller_issuer  String)
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES
+("hbase.columns.mapping"=":key,m:cusip,m:eff_date,m:gnma_issuer_num,m:agency,m:loan_purpose,m:refi_type,m:first_payment_date,m:maturity_date,m:note_rate,m:orig_loan_amt,m:orig_upb,m:current_upb,m:orig_loan_term,m:loan_age,m:rem_months_to_maturity,m:months_delinq,m:months_prepaid,m:gross_margin,m:orig_ltv,m:orig_cltv,m:orig_dti,m:credit_score,m:down_paym_assist,m:buy_down_status,m:upfront_mip,m:annual_mip,m:num_borrowers,m:first_time_buyer,m:num_units,m:state,m:msa,m:tpo_flag,m:curr_month_liq_flag,m:removal_reason,m:lastChgDate,m:loan_orig_date,m:seller_issuer,"hbase.table.default.storage.type"="binary");
+
+
+
+

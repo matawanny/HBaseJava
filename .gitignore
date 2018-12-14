@@ -53,3 +53,13 @@ log/
 target/
 .myeclipse/
 *.csv
+*.dat
+./src/main/resources/log4j.properties
+./src/main/resources/core-site.xml
+./src/main/resources/hive-site.xml
+./src/main/resources/hdfs-site.xml
+./src/main/resources/hbase-site.xml
+./src/conf/core-site.xml
+./src/conf/hbase-site.xml
+./src/conf/hdfs-site.xml
+./deploy.sh

@@ -105,3 +105,12 @@ c. Specific value for a column
 d. Timestamp and more...
 
 create 'fhlmc_loan_hbase', {NAME =>'m'}, {SPLITS => ['C05084008226', 'J15433000241', 'Q20826000030', 'V60172000602','V84230000010']}
+______________________________
+
+create 'fhlmc_loan_monthly', {NAME =>'m'}
+create 'fhlmc_arm_loan_monthly', {NAME =>'m'}
+create 'fhlmc_mod_loan_monthly', {NAME =>'m'}
+
+create 'fnma_loan_monthly', {NAME =>'m'}
+create 'fnma_arm_loan_monthly', {NAME =>'m'}
+create 'fnma_mod_loan_monthly', {NAME =>'m'}

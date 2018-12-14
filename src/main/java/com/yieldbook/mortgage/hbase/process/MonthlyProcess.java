@@ -11,6 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yieldbook.mortgage.hbase.action.BaseFileParser;
 import com.yieldbook.mortgage.hbase.action.FhlmcMonthlyFileParser;
+import com.yieldbook.mortgage.hbase.action.FnmaMonthlyFileParser;
+import com.yieldbook.mortgage.hbase.action.GnmaMonthlyFileParser;
 
 public class MonthlyProcess {
 	
@@ -50,6 +52,11 @@ public class MonthlyProcess {
 		  asofdate.setArgName("AS OF DATE");
 		  options.addOption(asofdate);
 		  
+		  Option lastchgdate = new Option("l", "lastchgdate", true, "Last Change Date related to storing folder name");
+		  //output.setRequired(true);
+		  asofdate.setArgName("LAST CHANGE DATE");
+		  options.addOption(lastchgdate);
+		  
 		  CommandLineParser commandLineParser = new DefaultParser();
 		  HelpFormatter helpFormatter = new HelpFormatter();
 		  CommandLine commandLine;
@@ -68,6 +75,7 @@ public class MonthlyProcess {
 		  String fileTypeStr = commandLine.getOptionValue("filetype");
 		  String outputFileStr = commandLine.getOptionValue("output");
 		  String asOfDateStr = commandLine.getOptionValue("asofdate");
+		  String lastChgDateStr = commandLine.getOptionValue("lastchgdate");
 
 		  System.out.println("Input File: " + inputFileStr);
 		  System.out.println("filetype : " + fileTypeStr);
@@ -75,19 +83,24 @@ public class MonthlyProcess {
 			  System.out.println("Output File Path : " + outputFileStr);
 		  if(!StringUtils.isEmpty(asOfDateStr))
 			  System.out.println("As Of Date : " + asOfDateStr);
+		  if(!StringUtils.isEmpty(lastChgDateStr))
+			  System.out.println("LAST CHANGE Date : " + lastChgDateStr);		  
 		  fileTypeStr = fileTypeStr.toLowerCase();
 		  
 		  MonthlyProcess preProcess=null;
 		  switch(fileTypeStr){
 		  case "fhlmc":
-			  preProcess = new MonthlyProcess(new FhlmcMonthlyFileParser(inputFileStr));
+			  preProcess = new MonthlyProcess(new FhlmcMonthlyFileParser(inputFileStr,asOfDateStr));
 			  preProcess.parseAndWriteFile();
 			  break;
 		  case "fnma":
-			  /*preProcess = new DailyProcess(new FNMAFileParser(inputFileStr, asOfDateStr, outputFileStr));
-			  preProcess.parseAndWriteFile();*/
+			  preProcess = new MonthlyProcess(new FnmaMonthlyFileParser(inputFileStr, asOfDateStr));
+			  preProcess.parseAndWriteFile();
 			  break;
-			  
+		  case "gnma":
+			  preProcess = new MonthlyProcess(new GnmaMonthlyFileParser(inputFileStr, asOfDateStr, lastChgDateStr));
+			  preProcess.parseAndWriteFile();
+			  break;			  
 		  default: 
 			  System.out.println("File Type: " +  fileTypeStr + " is not supported. ");
 		  

@@ -54,19 +54,19 @@
 		"type": ["null", "long"]
 	}, {
 		"name": "orig_note_rate",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "pc_issuance_note_rate",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "net_note_rate",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "orig_loan_amt",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "orig_upb",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "loan_age",
 		"type": ["null", "int"]
@@ -87,10 +87,10 @@
 		"type": ["null", "long"]
 	}, {
 		"name": "current_upb",
-		"type": ["null", "float"]
+		"type": ["null", "double"]
 	}, {
 		"name": "eff_date",
-		"type": "long"
+		"type": "int"
 	}, {
 		"name": "doc_assets",
 		"type": ["null", "string"]

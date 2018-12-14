@@ -50,7 +50,7 @@ public class YBTimeDateCurrencyUtilities {
 		return calendar.getTimeInMillis();
 	}
 	
-	public static String getMonthYearMillionSecsFHLM(String asOfDate){
+	public static String getMonthYearMillionSecsEmbs(String asOfDate){
 		
 		Date date = null;
 		try {
@@ -75,7 +75,28 @@ public class YBTimeDateCurrencyUtilities {
 		return calendar.getTimeInMillis()+"";
 	}
 	
-	public static String getMonthYearMillionSecsStringFHLM(String asOfDate){
+	public static String getMonthYearDayMillionSecsEmbs(String asOfDate){
+		
+		Date date = null;
+		
+		try {
+			
+			if(asOfDate.contains("/")){
+
+				date = df1.parse(asOfDate);
+			}else{
+				date = df.parse(asOfDate);
+			}			
+		} catch (ParseException e) {
+			return asOfDate;
+		}
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		return calendar.getTimeInMillis()+"";
+	}
+	
+	public static String getMonthYearMillionSecsStringEmbs(String asOfDate){
 		
 		Date date = null;
 		try {
@@ -89,4 +110,56 @@ public class YBTimeDateCurrencyUtilities {
 		return calendar.getTimeInMillis() + "";
 	}
 	
+	public static String getEffectiveDate(String dateInSeconds){
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(Long.parseLong(dateInSeconds));
+		int mYear = calendar.get(Calendar.YEAR);
+		int mMonth = calendar.get(Calendar.MONTH)+1;
+		int mDay = 1;
+		StringBuilder sb = new StringBuilder();
+		sb.append(mYear);
+		if(mMonth<10)
+			sb.append("0");
+		sb.append(mMonth);
+		if(mDay<10)
+			sb.append("0");
+		sb.append(mDay);
+		return sb.toString();
+	}
+	
+	public static String getAsOfDateMonthly(String yearMonthDate){
+		StringBuilder sb = new StringBuilder();
+		sb.append(yearMonthDate.substring(0,6));
+		sb.append("00");
+		return sb.toString();
+	}
+	
+	public static String convertDataFormat(String asOfDate){
+		Date date = null;
+		try {
+			if(asOfDate.contains("/")){
+
+				date = df1.parse(asOfDate);
+			}else{
+				date = df.parse(asOfDate);
+			}			
+		} catch (ParseException e) {
+			return asOfDate;
+		}
+		return df.format(date);
+	}
+	public static String convertMMyyyDataFormat(String asOfDate){
+		Date date = null;
+		try {
+			if(asOfDate.contains("/")){
+				date = dfmonthyear1.parse(asOfDate);
+			}else{
+				date = dfmonthyear.parse(asOfDate);
+			}			
+		} catch (ParseException e) {
+			return asOfDate;
+		}
+		return df.format(date);
+	}	
 }

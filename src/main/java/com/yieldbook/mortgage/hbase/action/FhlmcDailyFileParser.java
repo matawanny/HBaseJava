@@ -4,10 +4,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.hsqldb.lib.StringUtil;
 
 import com.opencsv.CSVParser;
 import com.opencsv.CSVReader;
@@ -17,7 +20,8 @@ import com.yieldbook.mortgage.hbase.bulkimport.FhlmcArmLoanColumnEnum;
 import com.yieldbook.mortgage.hbase.bulkimport.FhlmcLoanColumnEnum;
 import com.yieldbook.mortgage.hbase.bulkimport.FhlmcModLoanColumnEnum;
 import com.yieldbook.mortgage.hbase.operation.BatchOp;
-import com.yieldbook.mortgage.hbase.utility.YBTimeDateCurrencyUtilities;
+
+import static com.yieldbook.mortgage.hbase.utility.YBTimeDateCurrencyUtilities.*;
 
 public class FhlmcDailyFileParser extends BaseFileParser {
 	
@@ -29,7 +33,7 @@ public class FhlmcDailyFileParser extends BaseFileParser {
 	final static int ARM_LOAN_LENGTH = 20;
 	final static int MOD_LOAN_LENGTH = 41;
 
-	String inputFileName;
+	String inputFileName, poolFileName, asOfDate;
 	StringBuilder sb = new StringBuilder();
 	BatchOp batchLoan = null;
 	BatchOp batchArmLoan = null;
@@ -37,14 +41,18 @@ public class FhlmcDailyFileParser extends BaseFileParser {
 	CSVWriter loanPen=null;
 	CSVWriter armLoanPen=null;
 	CSVWriter modLoanPen=null;
+	Map<String, String>cusipDictionary=null;
 	
-	public FhlmcDailyFileParser(String inputFileName) {
-		super();
+	public FhlmcDailyFileParser(String inputFileName, String poolFileName, String asOfDateStr) {
+
 		this.inputFileName = inputFileName;
-		
+		this.poolFileName = poolFileName;
+		this.asOfDate=asOfDateStr;
 		batchLoan = new BatchOp(FHLMC_LOAN_MONTHLY);
 		batchArmLoan = new BatchOp(FHLMC_ARM_LOAN_MONTHLY);
 		batchModLoan = new BatchOp(FHLMC_MOD_LOAN_MONTHLY);
+		if(!StringUtil.isEmpty(poolFileName))
+			buildCusipDictionary();
 		
 		try {
 			batchLoan.ConnectToTable();
@@ -72,14 +80,7 @@ public class FhlmcDailyFileParser extends BaseFileParser {
 					'|', CSVWriter.NO_QUOTE_CHARACTER,
 					CSVWriter.DEFAULT_ESCAPE_CHARACTER,
 					CSVWriter.DEFAULT_LINE_END);
-			armLoanPen = new CSVWriter(new FileWriter("fhlmc_arm_loan_daily.csv", true),
-					'|', CSVWriter.NO_QUOTE_CHARACTER,
-					CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-					CSVWriter.DEFAULT_LINE_END);
-			modLoanPen = new CSVWriter(new FileWriter("fhlmc_mod_loan_daily.csv", true),
-					'|', CSVWriter.NO_QUOTE_CHARACTER,
-					CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-					CSVWriter.DEFAULT_LINE_END);			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -99,29 +100,24 @@ public class FhlmcDailyFileParser extends BaseFileParser {
 		}// end of else
 	}
 
-    private void insertRow(String[] row, long lastChgDate) throws IOException {
+    private void insertRow(String[] row, long lastChgDate, String effDate, boolean isArm, boolean isMod) throws IOException {
     	
 
-    	Put putLoan = createLoanPut(row, lastChgDate);
+    	Put putLoan = createLoanPut(row, lastChgDate, effDate);
     	batchLoan.insertPuts(putLoan);
    	
-    	if (!StringUtils.isEmpty(row[8])&&row[8].equalsIgnoreCase("ARM")){
-    		//row[8] mapping to Amortization_Type
-        	Put putArmLoan = createArmLoanPut(row, lastChgDate);
+    	if (isArm){
+        	Put putArmLoan = createArmLoanPut(row, lastChgDate, effDate);
         	batchArmLoan.insertPuts(putArmLoan);
 		} 	
     	
-		if (!StringUtils.isEmpty(row[64])||!StringUtils.isEmpty(row[65])
-				||!StringUtils.isEmpty(row[66])){
-			//row[64] mapping to mod_program 
-			//row[65] mapping to mod_type
-			//row[66] mapping to num_of_mods
-        	Put putModLoan = createModLoanPut(row, lastChgDate);
+		if (isMod){
+        	Put putModLoan = createModLoanPut(row, lastChgDate, effDate);
         	batchModLoan.insertPuts(putModLoan);
 		}
     }
     
-    private void insertLoanFields(TableTypeEnum tableType, long lastChgDate, String[] src, String[] des) {
+    private void insertLoanFields(TableTypeEnum tableType, long lastChgDate, String effDate,String[] src, String[] des) {
     	
     	switch(tableType) {
     		case LOAN:
@@ -143,8 +139,8 @@ public class FhlmcDailyFileParser extends BaseFileParser {
     			des[15]=src[41]; //first_pi_date
     			des[16]=src[15]; //maturity_date
     			des[17]=src[9]; //orig_note_rate
-    			des[18]=src[12]; //pc_issuance_note_rate
-    			des[19]=src[13]; //net_note_rate
+    			des[18]=src[10]; //pc_issuance_note_rate
+    			des[19]=src[12]; //net_note_rate
     			des[20]=src[5]; //orig_loan_amt
     			des[21]=src[6]; //orig_upb
     			des[22]=src[18]; //loan_age
@@ -154,7 +150,7 @@ public class FhlmcDailyFileParser extends BaseFileParser {
     			des[26]=src[34]; //seller
     			des[27]=lastChgDate+""; //last_chg_date
     			des[28]=src[7]; //current_upb
-    			des[29]=src[src.length-2]; //eff_date
+    			des[29]=effDate; //eff_date
     			des[30]=""; //doc_assets
     			des[31]=""; //doc_empl
     			des[32]=""; //doc_income
@@ -172,7 +168,7 @@ public class FhlmcDailyFileParser extends BaseFileParser {
     			des[44]=src[38]; //govt_ins_grnte
     			des[45]=src[39]; //assumability_ind
     			des[46]=src[44]; //prepay_term
-    			des[47]=src[src.length-1]; //as_of_date  			
+    			des[47]=this.asOfDate; //as_of_date  			
     			break;
     		case ARM_LOAN:
     			des[0]=src[0]; //loan_identifier
@@ -193,13 +189,13 @@ public class FhlmcDailyFileParser extends BaseFileParser {
     			des[15]=src[55]; //months_to_adjust
     			des[16]=src[45]; //index_desc
     			des[17]=lastChgDate+""; //last_chg_date
-    			des[18]=src[src.length-2]; //eff_date
-    			des[19]=src[src.length-1]; //as_of_date 			
+    			des[18]=effDate; //eff_date
+    			des[19]=this.asOfDate; //as_of_date 			
     			break;
     		case MOD_LOAN:
     			des[0]=src[0]; //loan_identifier
     			des[1]=src[4]; //cusip
-    			des[2]=src[src.length-2]; //eff_date
+    			des[2]=effDate; //eff_date
     			des[3]=src[1]; //correction_flag
     			des[4]=src[8]; //product_type
     			des[5]=src[100]; //origin_loan_purpose
@@ -236,8 +232,8 @@ public class FhlmcDailyFileParser extends BaseFileParser {
     			des[36]=src[83]; //next_adj_date
     			des[37]=src[80]; //terminal_step_rate
     			des[38]=src[81]; //terminal_step_date
-    			des[39]=""; //cur_gross_note_rate
-    			des[40]=src[src.length-1]; //as_of_date
+    			des[39]=src[13]; //cur_gross_note_rate
+    			des[40]=this.asOfDate; //as_of_date
     			break;
     		default:
     		    throw new AssertionError("Unknown Table Type");
@@ -251,7 +247,8 @@ public class FhlmcDailyFileParser extends BaseFileParser {
 		CSVReader reader = null;
 		String[] line =null;
 		long lastChgDate = Calendar.getInstance().getTimeInMillis();
-		
+		boolean isArm = false;
+		boolean isMod = false;
 		
 		try {
 			reader = new CSVReader(new FileReader(inputFileName), '|',
@@ -264,60 +261,70 @@ public class FhlmcDailyFileParser extends BaseFileParser {
 			while ((line = reader.readNext()) != null) {
 				if (StringUtils.isEmpty(line[0]))
 					continue;
-				String[] entries = new String[line.length+1];
+				isArm = false;
+				isMod = false;
 				if(!StringUtils.isEmpty(line[14]))
-					line[14]=YBTimeDateCurrencyUtilities
-						.getMonthYearMillionSecsFHLM(line[14]);
+					line[14]=getMonthYearMillionSecsEmbs(line[14]);
 				if(!StringUtils.isEmpty(line[15]))
-					line[15]=YBTimeDateCurrencyUtilities
-						.getMonthYearMillionSecsFHLM(line[15]);					
+					line[15]=getMonthYearMillionSecsEmbs(line[15]);					
 				if(!StringUtils.isEmpty(line[41]))
-					line[41]=YBTimeDateCurrencyUtilities
-						.getMonthYearMillionSecsFHLM(line[41]);					
+					line[41]=getMonthYearMillionSecsEmbs(line[41]);					
 				if(!StringUtils.isEmpty(line[54]))
-					line[54]=YBTimeDateCurrencyUtilities
-						.getMonthYearMillionSecsFHLM(line[54]);
+					line[54]=getMonthYearMillionSecsEmbs(line[54]);
 				if(!StringUtils.isEmpty(line[81]))
-					line[81]=YBTimeDateCurrencyUtilities
-						.getMonthYearMillionSecsFHLM(line[81]);
+					line[81]=getMonthYearMillionSecsEmbs(line[81]);
 				if(!StringUtils.isEmpty(line[83]))
-					line[83]=YBTimeDateCurrencyUtilities
-						.getMonthYearMillionSecsFHLM(line[83]);
+					line[83]=getMonthYearMillionSecsEmbs(line[83]);
 				if(!StringUtils.isEmpty(line[90]))
-					line[90]=YBTimeDateCurrencyUtilities
-						.getMonthYearMillionSecsFHLM(line[90]);
+					line[90]=getMonthYearMillionSecsEmbs(line[90]);
 				if(!StringUtils.isEmpty(line[91]))
-					line[91]=YBTimeDateCurrencyUtilities
-						.getMonthYearMillionSecsFHLM(line[91]);	
-				System.arraycopy(line, 0, entries, 0, line.length);
+					line[91]=getMonthYearMillionSecsEmbs(line[91]);	
 				
 				String[] loanFields = new String[LOAN_LENGTH];
-				insertLoanFields(TableTypeEnum.LOAN,lastChgDate,line,loanFields);
+				String effDate = getEffectiveDate(line[4]);
+				insertLoanFields(TableTypeEnum.LOAN,lastChgDate,effDate,line,loanFields);
 				loanPen.writeNext(loanFields);
 				
 		    	if (!StringUtils.isEmpty(line[8])&&line[8].equalsIgnoreCase("ARM")){
 		    		//row[8] mapping to Amortization_Type
+		    		isArm = true;
+		    		if(armLoanPen==null){
+		    			armLoanPen = new CSVWriter(new FileWriter("fhlmc_arm_loan_daily.csv", true),
+		    					'|', CSVWriter.NO_QUOTE_CHARACTER,
+		    					CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+		    					CSVWriter.DEFAULT_LINE_END);
+		    		}
 					String[] loanArmFields = new String[ARM_LOAN_LENGTH];
-					insertLoanFields(TableTypeEnum.ARM_LOAN,lastChgDate,line,loanArmFields);
+					insertLoanFields(TableTypeEnum.ARM_LOAN,lastChgDate,effDate,line,loanArmFields);
 					armLoanPen.writeNext(loanArmFields);
 				} 	
 		    	
-				if (!StringUtils.isEmpty(line[64])||!StringUtils.isEmpty(line[65])
-						||!StringUtils.isEmpty(line[66])){
+				if (!StringUtils.isBlank(line[64])
+						||!StringUtils.isBlank(line[65])
+						||!StringUtils.isBlank(line[66])){
 					//row[64] mapping to mod_program 
 					//row[65] mapping to mod_type
 					//row[66] mapping to num_of_mods
+					isMod = true;
+					if(modLoanPen==null){
+						modLoanPen = new CSVWriter(new FileWriter("fhlmc_mod_loan_daily.csv", true),
+								'|', CSVWriter.NO_QUOTE_CHARACTER,
+								CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+								CSVWriter.DEFAULT_LINE_END);	
+					}
 					String[] loanModFields = new String[MOD_LOAN_LENGTH];
-					insertLoanFields(TableTypeEnum.MOD_LOAN,lastChgDate,line,loanModFields);
+					insertLoanFields(TableTypeEnum.MOD_LOAN,lastChgDate,effDate,line,loanModFields);
 					modLoanPen.writeNext(loanModFields);
 				}
 
-				insertRow(entries,lastChgDate);
+				insertRow(line, lastChgDate, effDate, isArm, isMod);
 			} // end of While
-			
-			loanPen.close();
-			armLoanPen.close();
-			modLoanPen.close();
+			if(loanPen!=null)
+				loanPen.close();
+			if(armLoanPen!=null)
+				armLoanPen.close();
+			if(modLoanPen!=null)
+				modLoanPen.close();
 		} catch (IOException e) {
 			System.out.println("Cannot parse line + \"" + line +"\"");
 			e.printStackTrace();
@@ -327,7 +334,19 @@ public class FhlmcDailyFileParser extends BaseFileParser {
 		batchModLoan.submitBatch();
 	}
 	
-	 public Put createLoanPut(String[] fields, long lastChgDate){
+	private String getEffectiveDate(String cusip){
+		String effDate=null;
+		if(cusipDictionary==null){
+			effDate=this.asOfDate.substring(0,asOfDate.length()-2).concat("01");
+		}else{	
+			effDate = cusipDictionary.get(cusip);
+			if(StringUtils.isEmpty(effDate))
+			effDate=this.asOfDate.substring(0,asOfDate.length()-2).concat("01");
+		}
+		return effDate;
+	}
+	
+	 public Put createLoanPut(String[] fields, long lastChgDate, String effDate){
 		 Put put=new Put(Bytes.toBytes(fields[0]));
 		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.CORRECTION_FLAG.getColumnName(), fields[1].getBytes());
 		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.PREFIX.getColumnName(), fields[2].getBytes());
@@ -337,8 +356,8 @@ public class FhlmcDailyFileParser extends BaseFileParser {
 		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.CURRENT_UPB.getColumnName(), fields[7].getBytes());
 		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.PROD_TYPE_IND.getColumnName(), fields[8].getBytes());
 		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.ORIG_NOTE_RATE.getColumnName(), fields[9].getBytes());
-		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.PC_ISSUANCE_NOTE_RATE.getColumnName(), fields[12].getBytes());
-		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.NET_NOTE_RATE.getColumnName(), fields[13].getBytes());
+		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.PC_ISSUANCE_NOTE_RATE.getColumnName(), fields[10].getBytes());
+		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.NET_NOTE_RATE.getColumnName(), fields[12].getBytes());
 		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.FIRST_PAYMENT_DATE.getColumnName(), fields[14].getBytes());
 		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.MATURITY_DATE.getColumnName(), fields[15].getBytes());
 		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.ORIG_LOAN_TERM.getColumnName(), fields[16].getBytes());
@@ -369,8 +388,8 @@ public class FhlmcDailyFileParser extends BaseFileParser {
 		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.PREPAY_TERM.getColumnName(), fields[44].getBytes());
 		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.ESTM_LTV.getColumnName(), fields[72].getBytes());
 		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.UPD_CREDIT_SCORE.getColumnName(), fields[73].getBytes());
-		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.EFF_DATE.getColumnName(), fields[105].getBytes());
-		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.AS_OF_DATE.getColumnName(), fields[106].getBytes());
+		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.EFF_DATE.getColumnName(), effDate.getBytes());
+		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.AS_OF_DATE.getColumnName(), this.asOfDate.getBytes());
 		 
 	     String lastChgDateStr = lastChgDate + "";
 		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.LAST_CHG_DATE.getColumnName(), lastChgDateStr.getBytes());
@@ -378,7 +397,7 @@ public class FhlmcDailyFileParser extends BaseFileParser {
 		 return put;
 	 }	
 	 
-	 public Put createArmLoanPut(String[] fields, long lastChgDate){
+	 public Put createArmLoanPut(String[] fields, long lastChgDate, String effDate){
 		 Put put=new Put(Bytes.toBytes(fields[0]));
 
 		 put.addColumn(COL_FAM, FhlmcArmLoanColumnEnum.CUSIP.getColumnName(), fields[3].getBytes());
@@ -397,8 +416,8 @@ public class FhlmcDailyFileParser extends BaseFileParser {
 		 put.addColumn(COL_FAM, FhlmcArmLoanColumnEnum.INIT_CAP_UP.getColumnName(), fields[60].getBytes());
 		 put.addColumn(COL_FAM, FhlmcArmLoanColumnEnum.INIT_CAP_DN.getColumnName(), fields[61].getBytes());
 		 put.addColumn(COL_FAM, FhlmcArmLoanColumnEnum.PERIODIC_CAP.getColumnName(), fields[62].getBytes());
-		 put.addColumn(COL_FAM, FhlmcArmLoanColumnEnum.EFF_DATE.getColumnName(), fields[105].getBytes());		 
-		 put.addColumn(COL_FAM, FhlmcArmLoanColumnEnum.AS_OF_DATE.getColumnName(), fields[106].getBytes());	
+		 put.addColumn(COL_FAM, FhlmcArmLoanColumnEnum.EFF_DATE.getColumnName(), effDate.getBytes());		 
+		 put.addColumn(COL_FAM, FhlmcArmLoanColumnEnum.AS_OF_DATE.getColumnName(), this.asOfDate.getBytes());	
 		 
 	     String lastChgDateStr = lastChgDate + "";
 		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.LAST_CHG_DATE.getColumnName(), lastChgDateStr.getBytes());
@@ -406,12 +425,13 @@ public class FhlmcDailyFileParser extends BaseFileParser {
 		 return put;
 	 }
 	 
-	 public Put createModLoanPut(String[] fields, long lastChgDate){
+	 public Put createModLoanPut(String[] fields, long lastChgDate, String effDate){
 		 Put put=new Put(Bytes.toBytes(fields[0]));
 
 		 put.addColumn(COL_FAM, FhlmcModLoanColumnEnum.CORRECTION_FLAG.getColumnName(), fields[1].getBytes());
 		 put.addColumn(COL_FAM, FhlmcModLoanColumnEnum.CUSIP.getColumnName(), fields[3].getBytes());
 		 put.addColumn(COL_FAM, FhlmcModLoanColumnEnum.PRODUCT_TYPE.getColumnName(), fields[8].getBytes());
+		 put.addColumn(COL_FAM, FhlmcModLoanColumnEnum.CUR_GROSS_NOTE_RATE.getColumnName(), fields[13].getBytes());
 		 put.addColumn(COL_FAM, FhlmcModLoanColumnEnum.MOD_PROGRAM.getColumnName(), fields[64].getBytes());
 		 put.addColumn(COL_FAM, FhlmcModLoanColumnEnum.MOD_TYPE.getColumnName(), fields[65].getBytes());
 		 put.addColumn(COL_FAM, FhlmcModLoanColumnEnum.NUM_OF_MODS.getColumnName(), fields[66].getBytes());
@@ -445,12 +465,34 @@ public class FhlmcDailyFileParser extends BaseFileParser {
 		 put.addColumn(COL_FAM, FhlmcModLoanColumnEnum.ORIGIN_LOAN_PURPOSE.getColumnName(), fields[100].getBytes());
 		 put.addColumn(COL_FAM, FhlmcModLoanColumnEnum.ORIGIN_OCCUPANCY_STATUS.getColumnName(), fields[101].getBytes());
 		 put.addColumn(COL_FAM, FhlmcModLoanColumnEnum.ORIGIN_TPO_FLAG.getColumnName(), fields[102].getBytes());
-		 put.addColumn(COL_FAM, FhlmcModLoanColumnEnum.EFF_DATE.getColumnName(), fields[105].getBytes());
-		 put.addColumn(COL_FAM, FhlmcModLoanColumnEnum.AS_OF_DATE.getColumnName(), fields[106].getBytes());	
+		 put.addColumn(COL_FAM, FhlmcModLoanColumnEnum.EFF_DATE.getColumnName(), effDate.getBytes());
+		 put.addColumn(COL_FAM, FhlmcModLoanColumnEnum.AS_OF_DATE.getColumnName(), this.asOfDate.getBytes());	
 		 
 	     String lastChgDateStr = lastChgDate + "";
 		 put.addColumn(COL_FAM, FhlmcLoanColumnEnum.LAST_CHG_DATE.getColumnName(), lastChgDateStr.getBytes());
 
 		 return put;
 	 }
+
+	private void buildCusipDictionary() {
+		cusipDictionary = new HashMap<>();
+		CSVReader reader = null;
+		String[] line;
+		try {
+			reader = new CSVReader(new FileReader(poolFileName), ' ',
+					CSVParser.DEFAULT_QUOTE_CHARACTER,
+					ICSVParser.DEFAULT_ESCAPE_CHARACTER,
+					CSVReader.DEFAULT_SKIP_LINES,
+					ICSVParser.DEFAULT_STRICT_QUOTES,
+					ICSVParser.DEFAULT_IGNORE_LEADING_WHITESPACE);
+
+			while ((line = reader.readNext()) != null && line.length >= 2
+					&& !StringUtils.isEmpty(line[0])
+					&& !StringUtils.isEmpty(line[1])) {
+				cusipDictionary.put(line[0], convertMMyyyDataFormat(line[1]));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	} 
 }

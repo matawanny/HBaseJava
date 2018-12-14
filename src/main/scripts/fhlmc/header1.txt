@@ -149,11 +149,11 @@ mapred.local.dir
  }
  
 
-hadoop jar /root/.m2/repository/com/yieldbook/HBaseJava/1.0-SNAPSHOT/HBaseJava-1.0-SNAPSHOT-shaded.jar com.yieldbook.mortgage.hadoop.mapReduce.WordCount /user/root/word /user/root/wc
+hadoop jar /root/.m2/repository/com/yieldbook/HBaseJava/2.0.0/HBaseJava-2.0.0-shaded.jarr com.yieldbook.mortgage.hadoop.mapReduce.WordCount /user/root/word /user/root/wc
  
  
 hadoop jar target/ com.cloudera.examples.hbase.bulkimport.Driver <hdfsDirectory>/file1.txt \ <hdfsDirectory>/<outputname>/ <tablename>
 
-hadoop jar /root/.m2/repository/com/yieldbook/HBaseJava/1.0-SNAPSHOT/HBaseJava-1.0-SNAPSHOT-shaded.jar com.yieldbook.mortgage.hbase.mapReduce.Main \
+hadoop jar /root/.m2/repository/com/yieldbook/HBaseJava/2.0.0/HBaseJava-2.0.0-shaded.jarr com.yieldbook.mortgage.hbase.mapReduce.Main \
   
  

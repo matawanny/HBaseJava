@@ -34,23 +34,23 @@
     "default" : null
   }, {
     "name" : "original_interest_rate",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "issuance_interest_rate",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "current_interest_rate",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "issuance_net_interest_rate",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "current_net_interest_rate",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "first_payment_date",
@@ -182,11 +182,11 @@
     "default" : null
   }, {
     "name" : "mortgage_margin",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "mbs_pc_margin",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "interest_rate_adjustment_frequency",
@@ -222,35 +222,35 @@
     "default" : null
   }, {
     "name" : "life_ceiling_interest_rate",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "life_ceiling_net_interest_rate",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "life_floor_interest_rate",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "life_floor_net_interest_rate",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "initial_interest_rate_cap_up_percent",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "initial_interest_rate_cap_down_percent",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "periodic_interest_rate_cap_up_percent",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "periodic_interest_rate_cap_down_percent",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "modification_program",
@@ -314,11 +314,11 @@
     "default" : null
   }, {
     "name" : "next_step_rate",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "terminal_step_rate",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "terminal_step_date",
@@ -338,7 +338,7 @@
     "default" : null
   }, {
     "name" : "periodic_step_cap_up_percent",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "origination_mortgage_loan_amount",
@@ -346,7 +346,7 @@
     "default" : null
   }, {
     "name" : "origination_interest_rate",
-    "type" : [ "null", "float" ],
+    "type" : [ "null", "double" ],
     "default" : null
   }, {
     "name" : "origination_amortization_type",

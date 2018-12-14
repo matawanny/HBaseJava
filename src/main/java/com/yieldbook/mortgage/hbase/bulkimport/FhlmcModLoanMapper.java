@@ -1,7 +1,6 @@
 package com.yieldbook.mortgage.hbase.bulkimport;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Calendar;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +12,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import com.opencsv.CSVParser;
-import com.yieldbook.mortgage.hbase.utility.YBTimeDateCurrencyUtilities;
+
+import static com.yieldbook.mortgage.hbase.utility.YBTimeDateCurrencyUtilities.*;
 
 /**
  * Mapper Class
@@ -22,12 +22,10 @@ public class FhlmcModLoanMapper extends
 		Mapper<LongWritable, Text, ImmutableBytesWritable, KeyValue> {
 	// Set column family name
 	final static byte[] COL_FAM = "m".getBytes();
-	// Number of fields in text file
-	final static int NUM_FIELDS = 3;
+
 
 	CSVParser csvParser = new CSVParser('|');
 	String tableName = "";
-	String asOfDate = "";
 
 	ImmutableBytesWritable hKey = new ImmutableBytesWritable();
 	KeyValue kv;
@@ -41,7 +39,6 @@ public class FhlmcModLoanMapper extends
 		
 		// Get parameters
 		tableName = c.get("hbase.table.name");
-		asOfDate = c.get("as.of.date");
 		// in parameter is now saved: "pass parameter example"
 		// ( passed from Driver class )
 	}
@@ -60,6 +57,12 @@ public class FhlmcModLoanMapper extends
 			context.getCounter("FhlmcModLoanMapper", "PARSE_ERRORS").increment(1);
 			return;
 		}
+		if(fields.length<65){
+			context.getCounter("FhlmcModLoanMapper", "PARSE_ERRORS").increment(1);
+			System.out.println("java.lang.ArrayIndexOutOfBoundsException, length=" + fields.length);
+			System.out.println(value.toString());
+			return;
+		}
 		
 		if (StringUtils.isEmpty(fields[64])&&StringUtils.isEmpty(fields[65])
 				&&StringUtils.isEmpty(fields[66])){
@@ -73,7 +76,7 @@ public class FhlmcModLoanMapper extends
 
 		if (!StringUtils.isEmpty(fields[1])) {
 			kv = new KeyValue(hKey.get(), COL_FAM,
-					FhlmcModLoanColumnEnum.CORRECTION_FLAG.getColumnName(), fields[1].getBytes());
+					FhlmcModLoanColumnEnum.CORRECTION_FLAG.getColumnName(), "".getBytes());
 			context.write(hKey, kv);
 		}
 		if (!StringUtils.isEmpty(fields[4])) {
@@ -86,6 +89,11 @@ public class FhlmcModLoanMapper extends
 					FhlmcModLoanColumnEnum.PRODUCT_TYPE.getColumnName(), fields[8].getBytes());
 			context.write(hKey, kv);
 		}
+		if (!StringUtils.isEmpty(fields[13])) {
+			kv = new KeyValue(hKey.get(), COL_FAM,
+					FhlmcModLoanColumnEnum.CUR_GROSS_NOTE_RATE.getColumnName(), fields[13].getBytes());
+			context.write(hKey, kv);
+		}		
 		if (!StringUtils.isEmpty(fields[64])) {
 			kv = new KeyValue(hKey.get(), COL_FAM,
 					FhlmcModLoanColumnEnum.MOD_PROGRAM.getColumnName(), fields[64].getBytes());
@@ -157,8 +165,7 @@ public class FhlmcModLoanMapper extends
 			context.write(hKey, kv);
 		}
 		if (!StringUtils.isEmpty(fields[81])) {
-			fields[81]=YBTimeDateCurrencyUtilities
-				.getMonthYearMillionSecsFHLM(fields[81]);
+			fields[81]=getMonthYearMillionSecsEmbs(fields[81]);
 			kv = new KeyValue(hKey.get(), COL_FAM,
 					FhlmcModLoanColumnEnum.TERMINAL_STEP_DATE.getColumnName(), fields[81].getBytes());
 			context.write(hKey, kv);
@@ -169,8 +176,7 @@ public class FhlmcModLoanMapper extends
 			context.write(hKey, kv);
 		}
 		if (!StringUtils.isEmpty(fields[83])) {
-			fields[83]=YBTimeDateCurrencyUtilities
-				.getMonthYearMillionSecsFHLM(fields[83]);
+			fields[83]=getMonthYearMillionSecsEmbs(fields[83]);
 			kv = new KeyValue(hKey.get(), COL_FAM,
 					FhlmcModLoanColumnEnum.NEXT_ADJ_DATE.getColumnName(), fields[83].getBytes());
 			context.write(hKey, kv);
@@ -206,15 +212,13 @@ public class FhlmcModLoanMapper extends
 			context.write(hKey, kv);
 		}
 		if (!StringUtils.isEmpty(fields[90])) {
-			fields[90]=YBTimeDateCurrencyUtilities
-				.getMonthYearMillionSecsFHLM(fields[90]);
+			fields[90]=getMonthYearMillionSecsEmbs(fields[90]);
 			kv = new KeyValue(hKey.get(), COL_FAM,
 					FhlmcModLoanColumnEnum.ORIGIN_FIRST_PAYM_DATE.getColumnName(), fields[90].getBytes());
 			context.write(hKey, kv);
 		}
 		if (!StringUtils.isEmpty(fields[91])) {
-			fields[91]=YBTimeDateCurrencyUtilities
-				.getMonthYearMillionSecsFHLM(fields[91]);
+			fields[91]=getMonthYearMillionSecsEmbs(fields[91]);
 			kv = new KeyValue(hKey.get(), COL_FAM,
 					FhlmcModLoanColumnEnum.ORIGIN_MATURITY_DATE.getColumnName(), fields[91].getBytes());
 			context.write(hKey, kv);
@@ -259,12 +263,12 @@ public class FhlmcModLoanMapper extends
 					FhlmcModLoanColumnEnum.ORIGIN_TPO_FLAG.getColumnName(), fields[102].getBytes());
 			context.write(hKey, kv);
 		}
-		if (!StringUtils.isEmpty(fields[105])) {
+		if (!StringUtils.isEmpty(fields[fields.length-2])) {
 			kv = new KeyValue(hKey.get(), COL_FAM,
 					FhlmcModLoanColumnEnum.EFF_DATE.getColumnName(), fields[fields.length-2].getBytes());
 			context.write(hKey, kv);
 		}
-		if (!StringUtils.isEmpty(fields[106])) {
+		if (!StringUtils.isEmpty(fields[fields.length-1])) {
 			kv = new KeyValue(hKey.get(), COL_FAM,
 					FhlmcModLoanColumnEnum.AS_OF_DATE.getColumnName(), fields[fields.length-1].getBytes());
 			context.write(hKey, kv);
